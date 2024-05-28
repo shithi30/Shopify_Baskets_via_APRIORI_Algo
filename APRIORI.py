@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
-
-
 # ref: https://www.geeksforgeeks.org/implementing-apriori-algorithm-in-python/
 
 # import
@@ -16,26 +13,14 @@ import win32com.client
 from pretty_html_table import build_table
 import time
 
-
-# In[2]:
-
-
 # time
 start_time = time.time()
-
-
-# In[3]:
-
 
 # transactions
 data = pd.read_excel('Ushop L4M Data.xlsx')
 data = data[['Name', 'Email', 'Financial Status', 'Fulfillment Status', 'Lineitem quantity', 'Lineitem name', 'Lineitem sku', 'Payment ID', 'Paid at']]
 data.columns = ['name', 'email', 'fin_status', 'fulfil_status', 'item_qty', 'item_name', 'sku', 'pay_id', 'paid_at']
 display(data)
-
-
-# In[4]:
-
 
 # clean transactions
 qry = '''
@@ -46,20 +31,12 @@ where name in(select distinct name from data where fin_status='paid' and fulfil_
 data = duckdb.query(qry).df()
 display(data)
 
-
-# In[5]:
-
-
 # prepare transactions
 basket_ushop = (data
     .groupby(['txn_id', 'item_name'])['item_qty']
     .sum().unstack().reset_index().fillna(0)
     .set_index('txn_id'))
 display(basket_ushop)
-
-
-# In[6]:
-
 
 # one-hot encode
 def hot_encode(x):
@@ -68,10 +45,6 @@ def hot_encode(x):
 basket_ushop = basket_ushop.applymap(hot_encode)
 display(basket_ushop)
 
-
-# In[7]:
-
-
 # itemsets
 frq_items_df = apriori(basket_ushop.astype('bool'), min_support=0.02, use_colnames=True)
 
@@ -79,19 +52,11 @@ frq_items_df = apriori(basket_ushop.astype('bool'), min_support=0.02, use_colnam
 rules_df = association_rules(frq_items_df, metric="lift", min_threshold=1)
 rules_df = rules_df.sort_values(['confidence', 'lift'], ascending=[False, False])
 
-
-# In[8]:
-
-
 # clean itemsets
 frq_items_df['itemsets'] = [itemset.replace("'", "")[11:-2] for itemset in frq_items_df['itemsets'].astype('string').tolist()]
 frq_items_df['items'] = [itemset.count(", ") + 1 for itemset in frq_items_df['itemsets'].tolist()] 
 frq_items_df = duckdb.query('''select items, itemsets itemset, support from frq_items_df where items>1 order by support desc''').df()
 display(frq_items_df)
-
-
-# In[9]:
-
 
 # clean rules
 cols = ['antecedents', 'consequents']
@@ -99,10 +64,6 @@ rules_df[cols] = rules_df[cols].applymap(lambda x: tuple(x))
 rules_df = rules_df.explode('antecedents').reset_index(drop=True).explode('consequents').reset_index(drop=True)
 rules_df = duckdb.query('''select antecedents antecedent, consequents consequent, support, confidence, lift, leverage, conviction, zhangs_metric from rules_df''').df()
 display(rules_df)
-
-
-# In[10]:
-
 
 # credentials
 SERVICE_ACCOUNT_FILE = 'read-write-to-gsheet-apis-1-04f16c652b1e.json'
@@ -124,10 +85,6 @@ request = sheet.values().update(spreadsheetId=SAMPLE_SPREADSHEET_ID, range="'APR
 # update rules
 write_df = rules_df.fillna('')
 request = sheet.values().update(spreadsheetId=SAMPLE_SPREADSHEET_ID, range="'APRIORI'!E2", valueInputOption='USER_ENTERED', body={'values': [write_df.columns.values.tolist()] + write_df.values.tolist()}).execute()
-
-
-# In[11]:
-
 
 # email
 ol = win32com.client.Dispatch("outlook.application")
@@ -167,10 +124,6 @@ newmail.Attachments.Add(filename)
 
 # send
 newmail.Send()
-
-
-# In[12]:
-
 
 # stats
 elapsed_time = time.time() - start_time
