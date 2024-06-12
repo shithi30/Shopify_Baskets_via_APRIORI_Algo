@@ -3,8 +3,6 @@
 # APRIORI numerical: https://www.youtube.com/watch?v=LZii6N4vGDs
 # APRIORI implementation in R: https://www.youtube.com/watch?v=NnJ4CHDeXOc
 
-# ultimate good rules
-
 # R libraries
 library('arules')
 library('arulesViz')
