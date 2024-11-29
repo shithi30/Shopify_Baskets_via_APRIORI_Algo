@@ -1,6 +1,6 @@
 At Unilever and Sheba Platform Ltd, market basket analysis was performed to bundle up correlated services/SKUs. APRIORI algorithm was utilized to identify popular baskets in order to devise data-driven campaigns.
 
-**Tech Stack: ** Language - `Python, R` , Databases - `DuckDB, MySQL` , Reporting - `GSheets API, win32com` 
+**Tech Stack:** Language - `Python, R` , Databases - `DuckDB, MySQL` , Reporting - `GSheets API, win32com` 
 
 ### Python: Unilever Popular Itemsets (SKU Bundles)
 <p align="center">
